@@ -100,6 +100,11 @@ namespace GraphVisualizer
 
             UnityEditor.Playables.Utility.graphCreated += OnGraphCreated;
             UnityEditor.Playables.Utility.destroyingGraph += OnDestroyingGraph;
+            
+            if (m_Renderer == null)
+                m_Renderer = new DefaultGraphRenderer();
+            
+            rootVisualElement.Add(m_Renderer.GetVisualElement());
         }
 
         void OnGraphCreated(PlayableGraph graph)
@@ -130,7 +135,24 @@ namespace GraphVisualizer
             }
 
             GUILayout.BeginVertical();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("GraphView"))
+            {
+                m_Renderer = new GraphViewRenderer();
+                rootVisualElement.Clear();
+                rootVisualElement.Add(m_Renderer.GetVisualElement());
+                m_Renderer.Draw(m_Layout, Rect.zero, m_GraphSettings);
+                (m_Renderer as GraphViewRenderer).RedrawNodes();
+            }
+
+            if (GUILayout.Button("Oldskool"))
+            {
+                m_Renderer = new DefaultGraphRenderer();
+                rootVisualElement.Clear();
+            }
             m_CurrentGraph = GetSelectedGraphInToolBar(selectedGraphs, m_CurrentGraph);
+
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
 
             if (!m_CurrentGraph.IsValid())

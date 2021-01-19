@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace GraphVisualizer
 {
@@ -7,6 +8,7 @@ namespace GraphVisualizer
     {
         void Draw(IGraphLayout graphLayout, Rect drawingArea);
         void Draw(IGraphLayout graphLayout, Rect drawingArea, GraphSettings graphSettings);
+        VisualElement GetVisualElement();
     }
 
     // Customization of how the graph will be displayed:

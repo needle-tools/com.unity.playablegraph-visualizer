@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace GraphVisualizer
 {
@@ -39,6 +40,11 @@ namespace GraphVisualizer
         private Texture2D m_ColorBar;
         Vector2 m_ScrollPos;
 
+        public VisualElement GetVisualElement()
+        {
+            return null;
+        }
+
         private struct NodeTypeLegend
         {
             public Color color;
@@ -47,7 +53,6 @@ namespace GraphVisualizer
 
         public DefaultGraphRenderer()
         {
-            InitializeStyles();
         }
 
         public void Reset()
@@ -68,6 +73,9 @@ namespace GraphVisualizer
 
         public void Draw(IGraphLayout graphLayout, Rect totalDrawingArea, GraphSettings graphSettings)
         {
+            if(m_LegendLabelStyle == null)
+                InitializeStyles();
+            
             var legendArea = new Rect();
             var drawingArea = new Rect(totalDrawingArea);
 
