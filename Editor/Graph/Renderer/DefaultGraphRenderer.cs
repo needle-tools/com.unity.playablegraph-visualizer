@@ -311,9 +311,23 @@ namespace GraphVisualizer
             GUI.DrawTexture(GUILayoutUtility.GetRect(width, colorbarHeight), m_ColorBar);
         }
 
+        private Vector2 nodeOffset;
+        private float zoom = 1;
+
         // Draw the graph and returns the selected Node if there's any.
         private void DrawGraph(IGraphLayout graphLayout, Rect drawingArea, GraphSettings graphSettings)
         {
+            var currentEvent = Event.current;
+            var et = currentEvent.type;
+            if (currentEvent.type == EventType.MouseDrag && currentEvent.button == 0)
+            {
+                nodeOffset += currentEvent.delta;
+            }
+            if (et == EventType.ScrollWheel)
+            {
+                zoom += currentEvent.delta.y * .005f;
+            }
+            
             // add border, except on right-hand side where the legend will provide necessary padding
             drawingArea = new Rect(drawingArea.x + s_BorderSize,
                 drawingArea.y + s_BorderSize,
@@ -326,15 +340,21 @@ namespace GraphVisualizer
                 b.Encapsulate(new Vector3(v.position.x, v.position.y, 0.0f));
             }
 
+
             // Increase b by maximum node size (since b is measured between node centers)
             b.Expand(new Vector3(graphSettings.maximumNormalizedNodeSize, graphSettings.maximumNormalizedNodeSize, 0));
 
             var scale = new Vector2(drawingArea.width / b.size.x, drawingArea.height / b.size.y);
             var offset = new Vector2(-b.min.x, -b.min.y);
 
-            Vector2 nodeSize = ComputeNodeSize(scale, graphSettings);
+            Vector2 nodeSize = ComputeNodeSize(scale / zoom, graphSettings);
+            
 
             GUI.BeginGroup(drawingArea);
+            
+
+            GUI.matrix = Matrix4x4.TRS(new Vector3(nodeOffset.x / Screen.width * 1024, nodeOffset.y / Screen.height * 1024, 0), Quaternion.identity,
+                Vector3.one) * Matrix4x4.Scale(Vector3.one * (1 / zoom));
 
             foreach (var e in graphLayout.edges)
             {
@@ -348,7 +368,6 @@ namespace GraphVisualizer
                     DrawEdge(v0, v1, node.weight);
             }
 
-            Event currentEvent = Event.current;
 
             bool oldSelectionFound = false;
             Node newSelectedNode = null;
