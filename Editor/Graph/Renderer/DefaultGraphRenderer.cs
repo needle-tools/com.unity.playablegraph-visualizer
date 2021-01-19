@@ -325,8 +325,12 @@ namespace GraphVisualizer
             }
             if (et == EventType.ScrollWheel)
             {
-                zoom += currentEvent.delta.y * .005f;
+                zoom += currentEvent.delta.y * .03f * zoom;
             }
+
+            var screen = new Vector2(Screen.width, Screen.height);
+            GUI.matrix = Matrix4x4.Translate(new Vector2(nodeOffset.x / Screen.width * 1024, nodeOffset.y / Screen.height * 1024));
+            GUIUtility.ScaleAroundPivot(Vector2.one * 1/zoom, screen * .5f - nodeOffset);
             
             // add border, except on right-hand side where the legend will provide necessary padding
             drawingArea = new Rect(drawingArea.x + s_BorderSize,
@@ -352,10 +356,6 @@ namespace GraphVisualizer
 
             GUI.BeginGroup(drawingArea);
             
-
-            GUI.matrix = Matrix4x4.TRS(new Vector3(nodeOffset.x / Screen.width * 1024, nodeOffset.y / Screen.height * 1024, 0), Quaternion.identity,
-                Vector3.one) * Matrix4x4.Scale(Vector3.one * (1 / zoom));
-
             foreach (var e in graphLayout.edges)
             {
                 Vector2 v0 = ScaleVertex(e.source.position, offset, scale);
