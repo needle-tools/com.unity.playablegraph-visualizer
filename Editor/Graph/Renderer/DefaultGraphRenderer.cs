@@ -311,13 +311,13 @@ namespace GraphVisualizer
             GUI.DrawTexture(GUILayoutUtility.GetRect(width, colorbarHeight), m_ColorBar);
         }
 
-        private Vector2 nodeOffset
+        private Vector2 Panning
         {
             get => SessionState.GetVector3("_PlayableGraph_NodeOffset", Vector3.zero);
             set => SessionState.SetVector3("_PlayableGraph_NodeOffset", value);
         }
 
-        private float zoom
+        private float Zoom
         {
             get => SessionState.GetFloat("_PlayableGraph_Zoom", 1);
             set => SessionState.SetFloat("_PlayableGraph_Zoom", value);
@@ -330,22 +330,22 @@ namespace GraphVisualizer
             var et = currentEvent.type;
             if (currentEvent.type == EventType.MouseDrag && currentEvent.button == 0)
             {
-                nodeOffset += currentEvent.delta;
+                Panning += currentEvent.delta;
             }
             if (et == EventType.ScrollWheel)
             {
-                zoom += currentEvent.delta.y * .03f * zoom;
+                Zoom += currentEvent.delta.y * .03f * Zoom;
             }
 
             if (et == EventType.KeyUp && currentEvent.keyCode == KeyCode.R)
             {
-                zoom = 1;
-                nodeOffset = Vector2.zero;
+                Zoom = 1;
+                Panning = Vector2.zero;
             }
 
             var screen = new Vector2(Screen.width, Screen.height);
-            GUI.matrix = Matrix4x4.Translate(new Vector2(nodeOffset.x / Screen.width * 1024, nodeOffset.y / Screen.height * 1024));
-            GUIUtility.ScaleAroundPivot(Vector2.one * 1/zoom, screen * .5f - nodeOffset);
+            GUI.matrix = Matrix4x4.Translate(new Vector2(Panning.x / Screen.width * 1024, Panning.y / Screen.height * 1024));
+            GUIUtility.ScaleAroundPivot(Vector2.one * 1/Zoom, screen * .5f - Panning);
             
             // add border, except on right-hand side where the legend will provide necessary padding
             drawingArea = new Rect(drawingArea.x + s_BorderSize,
@@ -366,7 +366,7 @@ namespace GraphVisualizer
             var scale = new Vector2(drawingArea.width / b.size.x, drawingArea.height / b.size.y);
             var offset = new Vector2(-b.min.x, -b.min.y);
 
-            Vector2 nodeSize = ComputeNodeSize(scale / zoom, graphSettings);
+            Vector2 nodeSize = ComputeNodeSize(scale / Zoom, graphSettings);
             
 
             GUI.BeginGroup(drawingArea);
