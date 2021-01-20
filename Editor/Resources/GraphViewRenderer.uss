@@ -4,6 +4,10 @@ PlayableGraphView .edge {
     --edge-width: 10px; */
 }
 
+Node #title {
+    border-bottom-width:8px;
+}
+
 .__zoom_100 Node #title {
     
 }
@@ -14,6 +18,7 @@ PlayableGraphView .edge {
 
 .__zoom_75 Node #title {
     height: 80px;
+    border-bottom-width:10px;
 }
 
 .__zoom_75 Node #title Label {
@@ -23,6 +28,7 @@ PlayableGraphView .edge {
 
 .__zoom_50 Node #title {
     height: 160px;
+    border-bottom-width:15px;
 }
 
 .__zoom_50 Node #title Label {
@@ -32,6 +38,18 @@ PlayableGraphView .edge {
 
 .__zoom_25 Node #title {
     height: 200px;
+    border-bottom-width:18px;
+}
+
+.__zoom_25 Node #title Label {
+    font-size: 36px;
+    white-space:normal;
+}
+
+.__zoom_10 Node #title {
+    height: 200px;
+    border-bottom-width:100px;
+    margin-top:-100px;
 }
 
 .__zoom_25 Node #title Label {

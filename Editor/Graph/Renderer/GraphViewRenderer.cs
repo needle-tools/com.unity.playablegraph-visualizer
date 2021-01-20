@@ -28,7 +28,7 @@ public class GraphViewRenderer : IGraphRenderer
     {
         public PlayableGraphView()
         {
-            SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
+            SetupZoom(0.1f, ContentZoomer.DefaultMaxScale);
             this.viewTransformChanged = GraphTransformChanged;
             
             this.AddManipulator(new ContentDragger());
@@ -65,6 +65,8 @@ public class GraphViewRenderer : IGraphRenderer
             // zoom levels every 0.25 steps
             graphview.RemoveFromClassList(lastZoomClass);
             var zoom = Mathf.CeilToInt(graphview.scale / 0.25f) * 25;
+            if (graphview.scale < 0.2f)
+                zoom = 10;
             lastZoomClass = "__zoom_" + zoom;
             graphview.AddToClassList(lastZoomClass);
         }
@@ -138,6 +140,14 @@ public class GraphViewRenderer : IGraphRenderer
         }
 
         Debug.Log("Added " + graphView.nodes.ToList().Count + " nodes, " + graphView.edges.ToList().Count + " edges.");
+
+        void FrameAndForget(GeometryChangedEvent evt)
+        {
+            graphView.FrameAll();
+            graphView.UnregisterCallback<GeometryChangedEvent>(FrameAndForget);
+        }
+
+        graphView.RegisterCallback<GeometryChangedEvent>(FrameAndForget);
     }
     
     private const float kNodeWidth = 200.0f;
@@ -155,7 +165,7 @@ public class GraphViewRenderer : IGraphRenderer
         };
 
         objNode.titleContainer.style.borderBottomColor = graphNode.GetColor();
-        objNode.titleContainer.style.borderBottomWidth = 8;
+        // objNode.titleContainer.style.borderBottomWidth = 8;
 
         objNode.extensionContainer.style.backgroundColor = new Color(0.24f, 0.24f, 0.24f, 0.8f);
 
