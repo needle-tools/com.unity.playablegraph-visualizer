@@ -368,8 +368,9 @@ namespace GraphVisualizer
             scale.x = scale.y = Mathf.Max(scale.x, scale.y);
             var offset = new Vector2(-b.min.x, -b.min.y);
 
-            Vector2 nodeSize = ComputeNodeSize(scale / Zoom, graphSettings);
+            Vector2 nodeSize = ComputeNodeSize(scale / (Zoom * 1.2f), graphSettings);
 
+            drawingArea.size *= 100;
             GUI.BeginGroup(drawingArea);
             
             foreach (var e in graphLayout.edges)
