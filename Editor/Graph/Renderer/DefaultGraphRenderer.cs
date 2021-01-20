@@ -311,8 +311,17 @@ namespace GraphVisualizer
             GUI.DrawTexture(GUILayoutUtility.GetRect(width, colorbarHeight), m_ColorBar);
         }
 
-        private Vector2 nodeOffset;
-        private float zoom = 1;
+        private Vector2 nodeOffset
+        {
+            get => SessionState.GetVector3("_PlayableGraph_NodeOffset", Vector3.zero);
+            set => SessionState.SetVector3("_PlayableGraph_NodeOffset", value);
+        }
+
+        private float zoom
+        {
+            get => SessionState.GetFloat("_PlayableGraph_Zoom", 1);
+            set => SessionState.SetFloat("_PlayableGraph_Zoom", value);
+        }
 
         // Draw the graph and returns the selected Node if there's any.
         private void DrawGraph(IGraphLayout graphLayout, Rect drawingArea, GraphSettings graphSettings)
@@ -326,6 +335,12 @@ namespace GraphVisualizer
             if (et == EventType.ScrollWheel)
             {
                 zoom += currentEvent.delta.y * .03f * zoom;
+            }
+
+            if (et == EventType.KeyUp && currentEvent.keyCode == KeyCode.R)
+            {
+                zoom = 1;
+                nodeOffset = Vector2.zero;
             }
 
             var screen = new Vector2(Screen.width, Screen.height);
