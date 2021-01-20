@@ -65,8 +65,8 @@ namespace GraphVisualizer
 
         private static void ShowMessage(string msg)
         {
-            GUILayout.BeginVertical();
-            GUILayout.FlexibleSpace();
+            // GUILayout.BeginVertical();
+            // GUILayout.FlexibleSpace();
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -76,8 +76,8 @@ namespace GraphVisualizer
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.FlexibleSpace();
-            GUILayout.EndVertical();
+            // GUILayout.FlexibleSpace();
+            // GUILayout.EndVertical();
         }
 
         void Update()
@@ -128,15 +128,10 @@ namespace GraphVisualizer
         {
             // Early out if there is no graphs.
             var selectedGraphs = GetGraphList();
-            if (selectedGraphs.Count == 0)
-            {
-                ShowMessage("No PlayableGraph in the scene");
-                return;
-            }
-
-            GUILayout.BeginVertical();
+            
+            // GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("GraphView"))
+            if (GUILayout.Button("GraphView", GUILayout.ExpandWidth(false)))
             {
                 m_Renderer = new GraphViewRenderer();
                 rootVisualElement.Clear();
@@ -145,15 +140,22 @@ namespace GraphVisualizer
                 (m_Renderer as GraphViewRenderer).RedrawNodes();
             }
 
-            if (GUILayout.Button("Oldskool"))
+            if (GUILayout.Button("Oldskool", GUILayout.ExpandWidth(false)))
             {
                 m_Renderer = new DefaultGraphRenderer();
                 rootVisualElement.Clear();
             }
-            m_CurrentGraph = GetSelectedGraphInToolBar(selectedGraphs, m_CurrentGraph);
+            
+            if (selectedGraphs.Count != 0)
+                m_CurrentGraph = GetSelectedGraphInToolBar(selectedGraphs, m_CurrentGraph);
 
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
+            // GUILayout.EndVertical();
+
+            if (selectedGraphs.Count == 0)
+            {
+                ShowMessage("No PlayableGraph in the scene");
+                return;
+            }
 
             if (!m_CurrentGraph.IsValid())
             {
@@ -170,6 +172,8 @@ namespace GraphVisualizer
                 return;
             }
 
+            GUILayout.EndHorizontal();
+            
             if (m_Layout == null)
                 m_Layout = new ReingoldTilford();
 
