@@ -189,7 +189,7 @@ namespace GraphVisualizer
             if (selected)
             {
                 GUI.color = s_SelectedNodeColor;
-                float t = s_SelectedNodeThickness + (active ? s_ActiveNodeThickness : 0.0f);
+                float t = s_SelectedNodeThickness * Zoom + (active ? s_ActiveNodeThickness : 0.0f);
                 GUI.Box(new Rect(rect.x - t, rect.y - t, rect.width + 2 * t, rect.height + 2 * t),
                     string.Empty, m_NodeRectStyle);
             }
@@ -311,9 +311,42 @@ namespace GraphVisualizer
             GUI.DrawTexture(GUILayoutUtility.GetRect(width, colorbarHeight), m_ColorBar);
         }
 
+        private Vector2 Panning
+        {
+            get => SessionState.GetVector3("_PlayableGraph_NodeOffset", Vector3.zero);
+            set => SessionState.SetVector3("_PlayableGraph_NodeOffset", value);
+        }
+
+        private float Zoom
+        {
+            get => SessionState.GetFloat("_PlayableGraph_Zoom", 1);
+            set => SessionState.SetFloat("_PlayableGraph_Zoom", value);
+        }
+
         // Draw the graph and returns the selected Node if there's any.
         private void DrawGraph(IGraphLayout graphLayout, Rect drawingArea, GraphSettings graphSettings)
         {
+            var currentEvent = Event.current;
+            var et = currentEvent.type;
+            if (currentEvent.type == EventType.MouseDrag && currentEvent.button == 0)
+            {
+                Panning += currentEvent.delta;
+            }
+            if (et == EventType.ScrollWheel)
+            {
+                Zoom += currentEvent.delta.y * .03f * Zoom;
+            }
+
+            if (et == EventType.KeyUp && currentEvent.keyCode == KeyCode.R)
+            {
+                Zoom = 1;
+                Panning = Vector2.zero;
+            }
+
+            var screen = new Vector2(Screen.width, Screen.height);
+            GUI.matrix = Matrix4x4.Translate(new Vector2(Panning.x / Screen.width * 1024, Panning.y / Screen.height * 1024));
+            GUIUtility.ScaleAroundPivot(Vector2.one * 1/Zoom, screen * .5f - Panning);
+            
             // add border, except on right-hand side where the legend will provide necessary padding
             drawingArea = new Rect(drawingArea.x + s_BorderSize,
                 drawingArea.y + s_BorderSize,
@@ -326,36 +359,42 @@ namespace GraphVisualizer
                 b.Encapsulate(new Vector3(v.position.x, v.position.y, 0.0f));
             }
 
+
             // Increase b by maximum node size (since b is measured between node centers)
             b.Expand(new Vector3(graphSettings.maximumNormalizedNodeSize, graphSettings.maximumNormalizedNodeSize, 0));
 
             var scale = new Vector2(drawingArea.width / b.size.x, drawingArea.height / b.size.y);
+            var originalScale = scale;
+            scale.x = scale.y = Mathf.Max(scale.x, scale.y);
             var offset = new Vector2(-b.min.x, -b.min.y);
 
-            Vector2 nodeSize = ComputeNodeSize(scale, graphSettings);
+            Vector2 nodeSize = ComputeNodeSize(scale / (Zoom * 1.2f), graphSettings);
 
+            drawingArea.size *= 100;
             GUI.BeginGroup(drawingArea);
-
+            
             foreach (var e in graphLayout.edges)
             {
-                Vector2 v0 = ScaleVertex(e.source.position, offset, scale);
-                Vector2 v1 = ScaleVertex(e.destination.position, offset, scale);
+                Vector2 v0 = ScaleVertex(e.source.position, offset, originalScale);
+                Vector2 v1 = ScaleVertex(e.destination.position, offset, originalScale);
                 Node node = e.source.node;
 
                 if (graphLayout.leftToRight)
                     DrawEdge(v1, v0, node.weight);
                 else
-                    DrawEdge(v0, v1, node.weight);
+                    DrawEdge(v0, v1, node.weight);  
             }
 
-            Event currentEvent = Event.current;
 
             bool oldSelectionFound = false;
             Node newSelectedNode = null;
 
-            foreach (Vertex v in graphLayout.vertices)
+            // nodeSize = nodeSize / (Zoom);// * (Zoom * 1.3f);
+            foreach (Vertex v in graphLayout.vertices) 
             {
-                Vector2 nodeCenter = ScaleVertex(v.position, offset, scale) - nodeSize / 2;
+                // nodeRect.size /= Zoom * .5f;
+                // nodeRect.center -= nodeRect.size * .25f;
+                Vector2 nodeCenter = ScaleVertex(v.position, offset, originalScale) - nodeSize / 2;
                 var nodeRect = new Rect(nodeCenter.x, nodeCenter.y, nodeSize.x, nodeSize.y);
 
                 bool clicked = false;
