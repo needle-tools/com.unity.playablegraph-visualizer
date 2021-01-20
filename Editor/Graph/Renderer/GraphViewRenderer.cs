@@ -29,7 +29,8 @@ public class GraphViewRenderer : IGraphRenderer
         public PlayableGraphView()
         {
             SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
-
+            this.viewTransformChanged = GraphTransformChanged;
+            
             this.AddManipulator(new ContentDragger());
             this.AddManipulator(new SelectionDragger());
             this.AddManipulator(new RectangleSelector());
@@ -47,6 +48,25 @@ public class GraphViewRenderer : IGraphRenderer
 
             // background.StretchToParentSize();
             this.StretchToParentSize();
+
+            var path = "Packages/com.unity.playablegraph-visualizer/Editor/Resources/GraphViewRenderer.uss";
+#if UNITY_2019_1_OR_NEWER
+            this.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(path));
+#else
+            this.AddStyleSheetPath(path));
+#endif
+        }
+
+        private string lastZoomClass = "";
+        private void GraphTransformChanged(GraphView graphview)
+        {
+            // Debug.Log(graphview.scale);
+            
+            // zoom levels every 0.25 steps
+            graphview.RemoveFromClassList(lastZoomClass);
+            var zoom = Mathf.CeilToInt(graphview.scale / 0.25f) * 25;
+            lastZoomClass = "__zoom_" + zoom;
+            graphview.AddToClassList(lastZoomClass);
         }
     }
 
@@ -54,14 +74,15 @@ public class GraphViewRenderer : IGraphRenderer
     public void Draw(IGraphLayout graphLayout, Rect drawingArea, GraphSettings graphSettings)
     {
         this.graphLayout = graphLayout;
-
+        if (this.graphLayout == null) return;
+        
         foreach (var o in graphLayout.edges)
         {
             // find matching edge in dictionary so we can update the weights properly
             if (edgeToEdge.TryGetValue((o.destination.node.content, o.source.node.content), out var kvp))
             {
                 foreach(var edge in kvp)
-                    edge.style.opacity = o.source.node.weight * 0.9f + 0.1f;
+                    edge.style.opacity = o.source.node.weight * 0.8f + 0.2f;
             }
             // var graphEdge = edgeToEdge.FirstOrDefault(x => x.Key.destination.node == o.destination.node && x.Key.source.node == o.source.node).Value;
             // if(graphEdge != null)
@@ -102,7 +123,7 @@ public class GraphViewRenderer : IGraphRenderer
                 input = input.inputContainer[0] as Port,
                 output = output.outputContainer[0] as Port,
             };
-            edge.style.opacity = d.source.node.weight * 0.9f + 0.1f;
+            edge.style.opacity = d.source.node.weight * 0.8f + 0.2f;
             edge.input?.Connect(edge);
             edge.output?.Connect(edge);
 
@@ -122,7 +143,7 @@ public class GraphViewRenderer : IGraphRenderer
     private const float kNodeWidth = 200.0f;
     Node MakeNode(GraphVisualizer.Node graphNode)
     {
-        var nodeName = graphNode.GetContentType().Name;
+        var nodeName = ObjectNames.NicifyVariableName(graphNode.GetContentType().Name);
         
         var objNode = new Node
         {

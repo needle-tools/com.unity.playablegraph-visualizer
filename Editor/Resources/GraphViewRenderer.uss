@@ -1,0 +1,40 @@
+PlayableGraphView .edge {
+    /* doesn't work for some reason (overriden by?)
+    --edge-color: rgba(1,1,1,1);
+    --edge-width: 10px; */
+}
+
+.__zoom_100 Node #title {
+    
+}
+
+.__zoom_75 Node #title Label {
+
+}
+
+.__zoom_75 Node #title {
+    height: 80px;
+}
+
+.__zoom_75 Node #title Label {
+    font-size: 20px;
+    white-space:normal;
+}
+
+.__zoom_50 Node #title {
+    height: 160px;
+}
+
+.__zoom_50 Node #title Label {
+    font-size: 30px;
+    white-space:normal;
+}
+
+.__zoom_25 Node #title {
+    height: 200px;
+}
+
+.__zoom_25 Node #title Label {
+    font-size: 36px;
+    white-space:normal;
+}
