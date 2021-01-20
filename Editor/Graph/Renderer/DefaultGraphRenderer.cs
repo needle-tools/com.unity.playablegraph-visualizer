@@ -189,7 +189,7 @@ namespace GraphVisualizer
             if (selected)
             {
                 GUI.color = s_SelectedNodeColor;
-                float t = s_SelectedNodeThickness + (active ? s_ActiveNodeThickness : 0.0f);
+                float t = s_SelectedNodeThickness * Zoom + (active ? s_ActiveNodeThickness : 0.0f);
                 GUI.Box(new Rect(rect.x - t, rect.y - t, rect.width + 2 * t, rect.height + 2 * t),
                     string.Empty, m_NodeRectStyle);
             }
@@ -364,33 +364,36 @@ namespace GraphVisualizer
             b.Expand(new Vector3(graphSettings.maximumNormalizedNodeSize, graphSettings.maximumNormalizedNodeSize, 0));
 
             var scale = new Vector2(drawingArea.width / b.size.x, drawingArea.height / b.size.y);
+            var originalScale = scale;
             scale.x = scale.y = Mathf.Max(scale.x, scale.y);
             var offset = new Vector2(-b.min.x, -b.min.y);
 
             Vector2 nodeSize = ComputeNodeSize(scale / Zoom, graphSettings);
-            
 
             GUI.BeginGroup(drawingArea);
             
             foreach (var e in graphLayout.edges)
             {
-                Vector2 v0 = ScaleVertex(e.source.position, offset, scale);
-                Vector2 v1 = ScaleVertex(e.destination.position, offset, scale);
+                Vector2 v0 = ScaleVertex(e.source.position, offset, originalScale);
+                Vector2 v1 = ScaleVertex(e.destination.position, offset, originalScale);
                 Node node = e.source.node;
 
                 if (graphLayout.leftToRight)
                     DrawEdge(v1, v0, node.weight);
                 else
-                    DrawEdge(v0, v1, node.weight);
+                    DrawEdge(v0, v1, node.weight);  
             }
 
 
             bool oldSelectionFound = false;
             Node newSelectedNode = null;
 
-            foreach (Vertex v in graphLayout.vertices)
+            // nodeSize = nodeSize / (Zoom);// * (Zoom * 1.3f);
+            foreach (Vertex v in graphLayout.vertices) 
             {
-                Vector2 nodeCenter = ScaleVertex(v.position, offset, scale) - nodeSize / 2;
+                // nodeRect.size /= Zoom * .5f;
+                // nodeRect.center -= nodeRect.size * .25f;
+                Vector2 nodeCenter = ScaleVertex(v.position, offset, originalScale) - nodeSize / 2;
                 var nodeRect = new Rect(nodeCenter.x, nodeCenter.y, nodeSize.x, nodeSize.y);
 
                 bool clicked = false;
