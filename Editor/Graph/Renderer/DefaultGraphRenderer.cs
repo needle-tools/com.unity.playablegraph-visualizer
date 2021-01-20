@@ -364,6 +364,7 @@ namespace GraphVisualizer
             b.Expand(new Vector3(graphSettings.maximumNormalizedNodeSize, graphSettings.maximumNormalizedNodeSize, 0));
 
             var scale = new Vector2(drawingArea.width / b.size.x, drawingArea.height / b.size.y);
+            scale.x = scale.y = Mathf.Max(scale.x, scale.y);
             var offset = new Vector2(-b.min.x, -b.min.y);
 
             Vector2 nodeSize = ComputeNodeSize(scale / Zoom, graphSettings);
