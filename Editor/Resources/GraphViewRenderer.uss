@@ -1,7 +1,9 @@
-PlayableGraphView .edge {
+PlayableGraphView .port {
     /* doesn't work for some reason (overriden by?)
     --edge-color: rgba(1,1,1,1);
     --edge-width: 10px; */
+    
+    --port-color:rgba(255,255,255,1);
 }
 
 Node #title {
